@@ -12,12 +12,15 @@ import org.openqa.selenium.interactions.WheelInput;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.*;
+import java.util.Collections;
+import java.util.Comparator;
 
 public class FwangoScraper {
     public static void main(String[] args) {
@@ -29,8 +32,8 @@ public class FwangoScraper {
         driver.manage().window().setSize(new Dimension(1200, 800)); // Set window size
         
         //processHomePage(driver, url);
-        processResultsPage(driver, url);
-        //processPoolPlay(driver, url, tourneyName);
+        //processResultsPage(driver, url);
+        processPoolPlay(driver, url, tourneyName);
 
         driver.quit();
     }
@@ -55,11 +58,10 @@ public class FwangoScraper {
             WebElement container = driver.findElement(By.cssSelector("div.TournamentTeamList__Container-sc-13mkiy8-0.irfjog"));
             String lastLoadedTeamName = "";
             long startTime = System.currentTimeMillis();
-            long durationMillis = 6000; // 6 seconds - this is a little too much (even for the largest tournaments), but better safe than sorry
-            // Make sure to test this duration for richmond
+            long durationMillis = 9000; // 9 seconds
 
             while (System.currentTimeMillis() - startTime < durationMillis) {
-                int deltaY = 1620; // Adjust the scroll amount as needed
+                int deltaY = 1000; // Adjust the scroll amount as needed
                 new Actions(driver)
                     .scrollFromOrigin(WheelInput.ScrollOrigin.fromElement(container), 0, deltaY)
                     .perform();
@@ -83,6 +85,7 @@ public class FwangoScraper {
                 }
                 thisTeam.print();
             }
+            System.out.println(uniqueTeamNames.size());
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -145,37 +148,54 @@ public class FwangoScraper {
             WebElement poolPlayButton = driver.findElement(By.xpath("//*[@id=\"root\"]/span/div[1]/div/div/div[2]/div/div[1]/div[2]/div/div/div/div/nav/ul[2]/li[3]/div/a"));
             poolPlayButton.click();
             Thread.sleep(1000);
+            Map<String, List<GameData>> games = new HashMap<>();
+            WebElement dropdownButton = driver.findElement(By.className("select-input-container"));
+            poolPlayHelper(driver, "Premier", "//div[@class=' css-1olvhr-option' and text()='Premier 5.0+']", dropdownButton, games, tournamentName);
+            poolPlayHelper(driver, "Womens", "//div[@class=' css-1aqxqud-option']", dropdownButton, games, tournamentName);
+            poolPlayHelper(driver, "Contender", "//div[@class=' css-1aqxqud-option' and text()='Contender 4.5+']", dropdownButton, games, tournamentName);
+            poolPlayHelper(driver, "Advanced", "//div[@class=' css-1aqxqud-option' and text()='Advanced 4.0']", dropdownButton, games, tournamentName);
+            poolPlayHelper(driver, "Intermediate", "//div[@class=' css-1aqxqud-option' and text()='Intermediate 3.0']", dropdownButton, games, tournamentName);
+            poolPlayHelper(driver, "Mixed Advanced", "//div[@class=' css-1aqxqud-option' and text()='Mixed Advanced 4.0+']", dropdownButton, games, tournamentName);
+            poolPlayHelper(driver, "Mixed Intermediate", "//div[@class=' css-1aqxqud-option' and text()='Mixed Intermediate 2.0-3.0']", dropdownButton, games, tournamentName);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } 
+    }
+    public static void poolPlayHelper(WebDriver driver, String division, String xpath, WebElement dropdownButton, Map<String, List<GameData>> divisionGameResults, String tournamentName){
+        try{
+             // Click on the dropdown button
+            dropdownButton.click();
+            Thread.sleep(100);
+
+            // Locate the Selected option element based on its text
+            WebElement selectedOption = driver.findElement(By.xpath(xpath));
+            // Click on the selected option 
+            selectedOption.click();
+            Thread.sleep(1000);
             List<GameData> games = new ArrayList<>();
-            getPoolPlayData(driver, games, tournamentName);
             // Scroll and load more content
             WebElement container = driver.findElement(By.cssSelector("#body-scroll > div > div > div.infinite-scroll-component__outerdiv"));
             long startTime = System.currentTimeMillis();
-            long durationMillis = 15000; // 15 seconds
+            long durationMillis = 4000; // 4 seconds
 
             while (System.currentTimeMillis() - startTime < durationMillis) {
                 // System.out.println("new scroll " + games.size());
-                int deltaY = 3620; // Adjust the scroll amount as needed
+                int deltaY = 10000; // Adjust the scroll amount as needed
                 new Actions(driver)
                     .scrollFromOrigin(WheelInput.ScrollOrigin.fromElement(container), 0, deltaY)
                     .perform();
 
-                getPoolPlayData(driver, games, tournamentName);
             }
-            Set<GameData> seenGames = new HashSet<>();
-            List<GameData> uniqueGames = new ArrayList<>();
-            for (GameData game : games) {
-                if (seenGames.add(game)) {
-                    uniqueGames.add(game);
-                }
-            }
-            for(GameData game : uniqueGames){
+            getPoolPlayData(driver, games, tournamentName);
+            for(GameData game : games){
                 game.print();
             }
-                        System.out.println(uniqueGames.size());
-                        // NOTE: there seems to be a bug here, there are too many 'unique' games - some of these must actually be duplicates
-        } catch (Exception e) {
+            divisionGameResults.put(division, games);
+        }catch (Exception e) {
             e.printStackTrace();
         } 
+       
     }
     
     private static List<String> getTeamNames(WebDriver driver, List<String> teamNames, String lastTeamName, List<String> playerNames) {
@@ -247,11 +267,11 @@ public class FwangoScraper {
         // These will all match in terms of order of items
         List<WebElement> teamElements = driver.findElements(By.className("teams-container"));
         List<WebElement> pointElements = driver.findElements(By.className("games-container"));
+        List<WebElement> matchNumbers = driver.findElements(By.className("Truncate-sc-1q8foad-0"));
+        
         for(int i=0; i<teamElements.size(); i++){
             List<WebElement> nameElements = teamElements.get(i).findElements(By.className("team-name"));
             List<WebElement> scoreElement = pointElements.get(i).findElements(By.cssSelector("[type='number']"));
-            // System.out.println(nameElements.get(0).getText() + " " + scoreElement.get(0).getAttribute("value"));
-            // System.out.println(nameElements.get(1).getText() + " " + scoreElement.get(1).getAttribute("value"));
             GameData thisGame = new GameData();
             thisGame.team1 = nameElements.get(0).getText();
             thisGame.team2 = nameElements.get(1).getText();
@@ -259,6 +279,14 @@ public class FwangoScraper {
             thisGame.t2Points = Integer.parseInt(scoreElement.get(1).getAttribute("value"));
             thisGame.tournamentStage = "Pool Play";
             thisGame.tournamentName = tournamentName;
+            String matchNumberText = matchNumbers.get(i).getText();
+            Pattern pattern = Pattern.compile("M(\\d+)");
+            Matcher matcher = pattern.matcher(matchNumberText);
+
+            if (matcher.find()) {
+                String number = matcher.group(1);
+                thisGame.matchNumber = Integer.parseInt(number);
+            }
             games.add(thisGame);
         }
     }
