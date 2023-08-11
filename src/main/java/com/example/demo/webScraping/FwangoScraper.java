@@ -29,15 +29,16 @@ public class FwangoScraper {
         WebDriver driver = new ChromeDriver();
         String tourneyName = "philadelphia2023";
         String url = "https://fwango.io/" + tourneyName;
-        driver.manage().window().setSize(new Dimension(1200, 800)); // Set window size
+        driver.manage().window().setSize(new Dimension(1200, 1000)); // Set window size
         
-        //processHomePage(driver, url);
+        //processHomePage(driver, url, tourneyName);
         //processResultsPage(driver, url);
-        processPoolPlay(driver, url, tourneyName);
+        //processPoolPlay(driver, url, tourneyName);
+        processBracketPlay(driver, url, tourneyName);
 
         driver.quit();
     }
-    public static void processHomePage(WebDriver driver, String url){
+    public static void processHomePage(WebDriver driver, String url, String tourneyName){
         try {
             driver.get(url);
             Thread.sleep(2000);
@@ -49,6 +50,10 @@ public class FwangoScraper {
             // Get tournament date: 
             WebElement tourneyDateElement = driver.findElement(By.className("date"));
             System.out.println("Tournament date: " + tourneyDateElement.getText());
+            TournamentData thisTournament = new TournamentData();
+            thisTournament.date = tourneyDateElement.getText();
+            thisTournament.name = tourneyName;
+            thisTournament.url = url;
             // Find and print initially loaded team names
             List<String> newTeamNames = new ArrayList<>();
             List<String> playerNames = new ArrayList<>();
@@ -289,6 +294,109 @@ public class FwangoScraper {
             }
             games.add(thisGame);
         }
+    }
+    public static void processBracketPlay(WebDriver driver, String url, String tournamentName){
+        try{
+            // Going to add a gameData object for each game in the bracket and a series object for each series
+            driver.get(url);
+            Thread.sleep(1000);
+            // Locate the bracket play button element
+            WebElement bracketPlayButton = driver.findElement(By.xpath("//*[@id=\"root\"]/span/div[1]/div/div/div[2]/div/div[1]/div[2]/div/div/div/div/nav/ul[2]/li[4]/div/a/span/i"));
+            bracketPlayButton.click();
+            Thread.sleep(1000);
+            Map<String, List<GameData>> games = new HashMap<>();
+            Map<String, List<SeriesData>> series = new HashMap<>();
+            WebElement dropdownButton = driver.findElement(By.className("select-input-container"));
+            bracketPlayHelper(driver, "Premier", "//div[@class=' css-1olvhr-option' and text()='Premier 5.0+']", dropdownButton, games, series, tournamentName);
+            bracketPlayHelper(driver, "Womens", "//div[@class=' css-1aqxqud-option']", dropdownButton, games, series, tournamentName);
+            bracketPlayHelper(driver, "Contender", "//div[@class=' css-1aqxqud-option' and text()='Contender 4.5+']", dropdownButton, games, series, tournamentName);
+            bracketPlayHelper(driver, "Advanced", "//div[@class=' css-1aqxqud-option' and text()='Advanced 4.0']", dropdownButton, games, series, tournamentName);
+            bracketPlayHelper(driver, "Intermediate", "//div[@class=' css-1aqxqud-option' and text()='Intermediate 3.0']", dropdownButton, games, series, tournamentName);
+            bracketPlayHelper(driver, "Mixed Advanced", "//div[@class=' css-1aqxqud-option' and text()='Mixed Advanced 4.0+']", dropdownButton, games, series, tournamentName);
+            bracketPlayHelper(driver, "Mixed Intermediate", "//div[@class=' css-1aqxqud-option' and text()='Mixed Intermediate 2.0-3.0']", dropdownButton, games, series, tournamentName);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        } 
+        
+    }
+    public static void bracketPlayHelper(WebDriver driver, String division, String xpath, WebElement dropDownButton, Map<String, List<GameData>> allGames, Map<String, List<SeriesData>> allSeries, String tournamentName){
+        try{
+            // Click on the dropdown button
+            dropDownButton.click();
+            Thread.sleep(100);
+
+            // Locate the Selected option element based on its text
+            WebElement selectedOption = driver.findElement(By.xpath(xpath));
+            // Click on the selected option 
+            selectedOption.click();
+            Thread.sleep(1000);
+            // Need to scroll out a bit to see all series
+            long startTime = System.currentTimeMillis();
+            long durationMillis = 1000; // 1 second
+            WebElement container = driver.findElement(By.cssSelector("#body-scroll > div > div > div > div.react-transform-component.TransformComponent-module_container__3NwNd > div > div > div > div"));
+            while (System.currentTimeMillis() - startTime < durationMillis) {
+                int deltaY = 1000; // Adjust the scroll amount as needed
+                new Actions(driver)
+                    .scrollFromOrigin(WheelInput.ScrollOrigin.fromElement(container), 0, deltaY)
+                    .perform();
+            }
+            List<GameData> games = new ArrayList<>();
+            List<SeriesData> series = new ArrayList<>();
+            List<WebElement> rounds = driver.findElements(By.className("OneSidedBracketstyle__BracketDrawColumnWrapper-sc-1fhx3vb-1"));
+            for(WebElement round : rounds){
+                String currentRound = round.findElement(By.className("title")).getText();
+                List<WebElement> seriesElements = round.findElements(By.className("Matchstyle__BracketMatchContainer-sc-18us5a1-2"));
+                boolean isfinal = true;
+                for(WebElement seriesElement : seriesElements){
+                    if(currentRound.equals("Final") && !isfinal){
+                        currentRound = "Third Place";
+                    }
+                    else{
+                        isfinal = false;
+                    }
+                    List<WebElement> teamNameElements = seriesElement.findElements(By.className("team-name"));
+                    List<WebElement> scoreElements = seriesElement.findElement(By.className("games-container")).findElements(By.cssSelector("[type='number']"));
+                    String team1 = teamNameElements.get(0).getText();
+                    String team2 = teamNameElements.get(1).getText();
+                    ArrayList<Integer> t1Scores = new ArrayList<>();
+                    ArrayList<Integer> t2Scores = new ArrayList<>();
+                    for(int i=0; i<scoreElements.size(); i++){
+                        if(i%2==0){
+                            t1Scores.add(Integer.parseInt(scoreElements.get(i).getAttribute("value")));
+                        } 
+                        else{
+                            t2Scores.add(Integer.parseInt(scoreElements.get(i).getAttribute("value")));
+                        }
+                    }
+                    SeriesData thisSeries = new SeriesData();
+                    thisSeries.team1 = team1;
+                    thisSeries.team2 = team2;
+                    thisSeries.round = currentRound;
+                    thisSeries.tournament = tournamentName;
+                    thisSeries.t1Scores = t1Scores;
+                    thisSeries.t2Scores = t2Scores;
+                    series.add(thisSeries);
+                    // Now I am going to add each individual game from the series
+                    for(int i=0; i<t1Scores.size(); i++){
+                        GameData thisGameData = new GameData();
+                        thisGameData.team1 = team1;
+                        thisGameData.team2 = team2;
+                        thisGameData.t1Points = t1Scores.get(i);
+                        thisGameData.t2Points = t2Scores.get(i);
+                        thisGameData.tournamentName = tournamentName;
+                        thisGameData.tournamentStage = "Bracket play round of " + currentRound + " game " + (i+1);
+                        games.add(thisGameData);
+                    }
+                    thisSeries.print();
+                }
+            }
+            allSeries.put(division, series);
+            allGames.put(division, games);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        } 
     }
 }
 
