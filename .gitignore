@@ -1,4 +1,8 @@
 HELP.md
+series.csv
+games.csv
+divisionTeamResults.csv
+teamObjects.series.csv
 .gradle
 build/
 !gradle/wrapper/gradle-wrapper.jar

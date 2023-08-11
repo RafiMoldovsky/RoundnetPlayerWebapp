@@ -34,7 +34,7 @@ public class FwangoScraper {
         ArrayList<String> tournamentNames = new ArrayList<>();
         //tournamentNames.add("saltlakecity2023");
          tournamentNames.add("richmond2023");
-         //tournamentNames.add("philadelphia2023");
+         tournamentNames.add("philadelphia2023");
         ArrayList<TeamObject> teamObjects = new ArrayList<>();
         ArrayList<TeamResultObject> divisionTeamResults = new ArrayList<>();
         ArrayList<GameData> games = new ArrayList<>();
