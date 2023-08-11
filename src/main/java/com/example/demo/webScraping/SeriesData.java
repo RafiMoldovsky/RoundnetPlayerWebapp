@@ -6,10 +6,11 @@ public class SeriesData {
     public String team2;
     public String round;
     public String tournament;
-    ArrayList<Integer> t1Scores;
-    ArrayList<Integer> t2Scores;
+    public ArrayList<Integer> t1Scores;
+    public ArrayList<Integer> t2Scores;
+    public String division;
     public void print(){
-        System.out.println("Series between " + team1 + " and " + team2 + " in round of " + round + " at " + tournament + ":");
+        System.out.println("Series between " + team1 + " and " + team2 + " in round of " + round + " at " + tournament + " (" + division + "):");
         System.out.print(team1 + ": ");
         for(int i=0; i<t1Scores.size(); i++){
             if(i==t1Scores.size()-1){

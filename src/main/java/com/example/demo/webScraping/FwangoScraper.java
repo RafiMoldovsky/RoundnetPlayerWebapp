@@ -27,19 +27,39 @@ public class FwangoScraper {
         WebDriverManager.chromedriver().driverVersion("114.0.5735.90").setup(); // Setup ChromeDriver automatically
         
         WebDriver driver = new ChromeDriver();
-        String tourneyName = "philadelphia2023";
+        String tourneyName = "richmond2023";
         String url = "https://fwango.io/" + tourneyName;
         driver.manage().window().setSize(new Dimension(1200, 1000)); // Set window size
         ArrayList<TeamObject> teamObjects = new ArrayList<>();
         processHomePage(driver, url, tourneyName, teamObjects);
         Map<String, List<TeamResultObject>> divisionTeamResults = new HashMap<>();
-        processResultsPage(driver, url, divisionTeamResults);
+        processResultsPage(driver, url, divisionTeamResults, tourneyName);
         Map<String, List<GameData>> games = new HashMap<>();
         processPoolPlay(driver, url, tourneyName, games);
         Map<String, List<SeriesData>> series = new HashMap<>();
         processBracketPlay(driver, url, tourneyName, games, series);
-
+        printData(teamObjects, divisionTeamResults, games, series);
         driver.quit();
+    }
+    public static void printData(ArrayList<TeamObject> teamObjects, Map<String, List<TeamResultObject>> divisionTeamResults, Map<String, List<GameData>> games, Map<String, List<SeriesData>> series){
+        for(TeamObject team : teamObjects){
+            team.print();
+        }
+        for(String division : divisionTeamResults.keySet()){
+            for(TeamResultObject result : divisionTeamResults.get(division)){
+                result.print();
+            }
+        }
+        for(String division : games.keySet()){
+            for(GameData game : games.get(division)){
+                game.print();
+            }
+        }
+        for(String division : series.keySet()){
+            for(SeriesData thisSeries : series.get(division)){
+                thisSeries.print();
+            }
+        }
     }
     public static void processHomePage(WebDriver driver, String url, String tourneyName, ArrayList<TeamObject> teamObjects){
         try {
@@ -88,6 +108,7 @@ public class FwangoScraper {
                     String secondPlayer = parts[1].toLowerCase();
                     thisTeam.player1 = firstPlayer;
                     thisTeam.player2 = secondPlayer;
+                    thisTeam.tournament = tourneyName;
                     teamObjects.add(thisTeam);
                 }
             }
@@ -96,7 +117,7 @@ public class FwangoScraper {
             e.printStackTrace();
         } 
     }
-    public static void processResultsPage(WebDriver driver, String url, Map<String, List<TeamResultObject>> divisionTeamResults){
+    public static void processResultsPage(WebDriver driver, String url, Map<String, List<TeamResultObject>> divisionTeamResults, String tournament){
         // Now go to results page
 
            try {
@@ -109,19 +130,19 @@ public class FwangoScraper {
             // Locate the dropdown button element
             WebElement dropdownButton = driver.findElement(By.className("select-input-container"));
 
-            resultsProcessingHelper(driver, "Premier", "//div[@class=' css-1olvhr-option' and text()='Premier 5.0+']", dropdownButton, divisionTeamResults);
-            resultsProcessingHelper(driver, "Womens", "//div[@class=' css-1aqxqud-option']", dropdownButton, divisionTeamResults);
-            resultsProcessingHelper(driver, "Contender", "//div[@class=' css-1aqxqud-option' and text()='Contender 4.5+']", dropdownButton, divisionTeamResults);
-            resultsProcessingHelper(driver, "Advanced", "//div[@class=' css-1aqxqud-option' and text()='Advanced 4.0']", dropdownButton, divisionTeamResults);
-            resultsProcessingHelper(driver, "Intermediate", "//div[@class=' css-1aqxqud-option' and text()='Intermediate 3.0']", dropdownButton, divisionTeamResults);
-            resultsProcessingHelper(driver, "Mixed Advanced", "//div[@class=' css-1aqxqud-option' and text()='Mixed Advanced 4.0+']", dropdownButton, divisionTeamResults);
-            resultsProcessingHelper(driver, "Mixed Intermediate", "//div[@class=' css-1aqxqud-option' and text()='Mixed Intermediate 2.0-3.0']", dropdownButton, divisionTeamResults);
+            resultsProcessingHelper(driver, "Premier", "//div[@class=' css-1olvhr-option' and text()='Premier 5.0+']", dropdownButton, divisionTeamResults, tournament);
+            resultsProcessingHelper(driver, "Womens", "//div[@class=' css-1aqxqud-option']", dropdownButton, divisionTeamResults, tournament);
+            resultsProcessingHelper(driver, "Contender", "//div[@class=' css-1aqxqud-option' and text()='Contender 4.5+']", dropdownButton, divisionTeamResults, tournament);
+            resultsProcessingHelper(driver, "Advanced", "//div[@class=' css-1aqxqud-option' and text()='Advanced 4.0']", dropdownButton, divisionTeamResults, tournament);
+            resultsProcessingHelper(driver, "Intermediate", "//div[@class=' css-1aqxqud-option' and text()='Intermediate 3.0']", dropdownButton, divisionTeamResults, tournament);
+            resultsProcessingHelper(driver, "Mixed Advanced", "//div[@class=' css-1aqxqud-option' and text()='Mixed Advanced 4.0+']", dropdownButton, divisionTeamResults, tournament);
+            resultsProcessingHelper(driver, "Mixed Intermediate", "//div[@class=' css-1aqxqud-option' and text()='Mixed Intermediate 2.0-3.0']", dropdownButton, divisionTeamResults, tournament);
 
         } catch (Exception e) {
             e.printStackTrace();
         } 
     }
-    public static void resultsProcessingHelper(WebDriver driver, String division, String xpath, WebElement dropdownButton, Map<String, List<TeamResultObject>> divisionTeamResults){
+    public static void resultsProcessingHelper(WebDriver driver, String division, String xpath, WebElement dropdownButton, Map<String, List<TeamResultObject>> divisionTeamResults, String tournament){
         try{
             // Click on the dropdown button
             dropdownButton.click();
@@ -133,7 +154,7 @@ public class FwangoScraper {
             selectedOption.click();
             Thread.sleep(1000);
             List<TeamResultObject> results = new ArrayList<>();
-            getResultsData(driver, results);
+            getResultsData(driver, results, division, tournament);
             divisionTeamResults.put(division, results);
             // for(TeamResultObject result : results){
             //     result.print();
@@ -143,6 +164,37 @@ public class FwangoScraper {
             e.printStackTrace();
         } 
 
+    }
+    public static void getResultsData(WebDriver driver, List<TeamResultObject> teamResults, String division, String tournament){
+        // These will all match in terms of order of items
+        List<WebElement> teamNameElements = driver.findElements(By.className("team-name"));
+        List<WebElement> recordElements = driver.findElements(By.className("record-column"));
+        List<WebElement> rankElements = driver.findElements(By.cssSelector("td.rank-column"));
+        if (!recordElements.isEmpty()) {
+            recordElements.remove(0); // Remove the first element
+        }
+        for(int i=0; i<recordElements.size(); i++){
+            TeamResultObject thisResult = new TeamResultObject();
+            if(i<3 && rankElements.size()!=0){
+                thisResult.result = i+1;
+            }
+            else if(rankElements.size()!=0){
+                thisResult.result = Integer.valueOf(rankElements.get(i).getText());
+            }
+            String teamName = teamNameElements.get(i).getText();
+            String record = recordElements.get(i).getText();
+            String[] parts = record.split(" - ");
+            thisResult.teamName = teamName;
+            if (parts.length == 2) {
+                int wins = extractNumber(parts[0]);
+                int losses = extractNumber(parts[1]);
+                thisResult.wins = wins;
+                thisResult.losses = losses;
+                thisResult.division = division;
+                thisResult.tournament = tournament;
+            }
+            teamResults.add(thisResult);
+        }
     }
     public static void processPoolPlay(WebDriver driver, String url, String tournamentName, Map<String, List<GameData>> games){
         try{
@@ -190,7 +242,7 @@ public class FwangoScraper {
                     .perform();
 
             }
-            getPoolPlayData(driver, games, tournamentName);
+            getPoolPlayData(driver, games, tournamentName, division);
             // for(GameData game : games){
             //     game.print();
             // }
@@ -226,35 +278,6 @@ public class FwangoScraper {
 
         return uniqueList;
     }
-    public static void getResultsData(WebDriver driver, List<TeamResultObject> teamResults){
-        // These will all match in terms of order of items
-        List<WebElement> teamNameElements = driver.findElements(By.className("team-name"));
-        List<WebElement> recordElements = driver.findElements(By.className("record-column"));
-        List<WebElement> rankElements = driver.findElements(By.cssSelector("td.rank-column"));
-        if (!recordElements.isEmpty()) {
-            recordElements.remove(0); // Remove the first element
-        }
-        for(int i=0; i<recordElements.size(); i++){
-            TeamResultObject thisResult = new TeamResultObject();
-            if(i<3 && rankElements.size()!=0){
-                thisResult.result = i+1;
-            }
-            else if(rankElements.size()!=0){
-                thisResult.result = Integer.valueOf(rankElements.get(i).getText());
-            }
-            String teamName = teamNameElements.get(i).getText();
-            String record = recordElements.get(i).getText();
-            String[] parts = record.split(" - ");
-            thisResult.teamName = teamName;
-            if (parts.length == 2) {
-                int wins = extractNumber(parts[0]);
-                int losses = extractNumber(parts[1]);
-                thisResult.wins = wins;
-                thisResult.losses = losses;
-            }
-            teamResults.add(thisResult);
-        }
-    }
     public static int extractNumber(String input) {
         Pattern pattern = Pattern.compile("\\d+");
         Matcher matcher = pattern.matcher(input);
@@ -266,11 +289,10 @@ public class FwangoScraper {
         return 0;
     }
 
-    public static void getPoolPlayData(WebDriver driver, List<GameData> games, String tournamentName){
+    public static void getPoolPlayData(WebDriver driver, List<GameData> games, String tournamentName, String division){
         // These will all match in terms of order of items
         List<WebElement> teamElements = driver.findElements(By.className("teams-container"));
         List<WebElement> pointElements = driver.findElements(By.className("games-container"));
-        List<WebElement> matchNumbers = driver.findElements(By.className("Truncate-sc-1q8foad-0"));
         
         for(int i=0; i<teamElements.size(); i++){
             List<WebElement> nameElements = teamElements.get(i).findElements(By.className("team-name"));
@@ -282,14 +304,7 @@ public class FwangoScraper {
             thisGame.t2Points = Integer.parseInt(scoreElement.get(1).getAttribute("value"));
             thisGame.tournamentStage = "Pool Play";
             thisGame.tournamentName = tournamentName;
-            String matchNumberText = matchNumbers.get(i).getText();
-            Pattern pattern = Pattern.compile("M(\\d+)");
-            Matcher matcher = pattern.matcher(matchNumberText);
-
-            if (matcher.find()) {
-                String number = matcher.group(1);
-                thisGame.matchNumber = Integer.parseInt(number);
-            }
+            thisGame.division=division;
             games.add(thisGame);
         }
     }
@@ -378,6 +393,8 @@ public class FwangoScraper {
                     thisSeries.tournament = tournamentName;
                     thisSeries.t1Scores = t1Scores;
                     thisSeries.t2Scores = t2Scores;
+                    thisSeries.tournament = tournamentName;
+                    thisSeries.division = division;
                     series.add(thisSeries);
                     // Now I am going to add each individual game from the series
                     for(int i=0; i<t1Scores.size(); i++){
@@ -388,6 +405,7 @@ public class FwangoScraper {
                         thisGameData.t2Points = t2Scores.get(i);
                         thisGameData.tournamentName = tournamentName;
                         thisGameData.tournamentStage = "Bracket play round of " + currentRound + " game " + (i+1);
+                        thisGameData.division = division;
                         games.add(thisGameData);
                     }
                     // thisSeries.print();

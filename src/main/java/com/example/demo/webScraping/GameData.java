@@ -13,12 +13,12 @@ public class GameData {
     public int t2Points;
     public String tournamentStage;
     public String tournamentName;
-    public int matchNumber; // This is only relevant for sorting/ removing duplicates
+    public String division;
     GameData(){
 
     }
     public void print(){
-        System.out.println("Tournament: " + tournamentName);
+        System.out.println("Tournament: " + tournamentName + " (" + division + ")");
         System.out.println("Stage: " + tournamentStage);
         System.out.println("Team 1: " + team1);
         System.out.println("Players 1: " + t1p1 + ", " + t1p2);
@@ -26,7 +26,6 @@ public class GameData {
         System.out.println("Team 2: " + team2);
         System.out.println("Players 2: " + t2p1 + ", " + t2p2);
         System.out.println("Score 2: " + t2Points);
-        System.out.println("Match number: " + matchNumber);
         System.out.println();
     }
 }
