@@ -21,7 +21,7 @@ public class FwangoScraper {
         WebDriverManager.chromedriver().driverVersion("114.0.5735.90").setup(); // Setup ChromeDriver automatically
         
         WebDriver driver = new ChromeDriver();
-        String tourneyName = "richmond2023";
+        String tourneyName = "philadelphia2023";
         String url = "https://fwango.io/" + tourneyName;
         driver.manage().window().setSize(new Dimension(1200, 800)); // Set window size
         
@@ -245,7 +245,7 @@ public class FwangoScraper {
             long durationMillis = 15000; // 15 seconds
 
             while (System.currentTimeMillis() - startTime < durationMillis) {
-                System.out.println("new scroll " + games.size());
+                // System.out.println("new scroll " + games.size());
                 int deltaY = 3620; // Adjust the scroll amount as needed
                 new Actions(driver)
                     .scrollFromOrigin(WheelInput.ScrollOrigin.fromElement(container), 0, deltaY)
@@ -264,6 +264,7 @@ public class FwangoScraper {
                 game.print();
             }
                         System.out.println(uniqueGames.size());
+                        // NOTE: there seems to be a bug here, there are too many 'unique' games - some of these must actually be duplicates
         } catch (Exception e) {
             e.printStackTrace();
         } 
