@@ -30,15 +30,18 @@ public class FwangoScraper {
         String tourneyName = "philadelphia2023";
         String url = "https://fwango.io/" + tourneyName;
         driver.manage().window().setSize(new Dimension(1200, 1000)); // Set window size
-        
-        //processHomePage(driver, url, tourneyName);
-        //processResultsPage(driver, url);
-        //processPoolPlay(driver, url, tourneyName);
-        processBracketPlay(driver, url, tourneyName);
+        ArrayList<TeamObject> teamObjects = new ArrayList<>();
+        processHomePage(driver, url, tourneyName, teamObjects);
+        Map<String, List<TeamResultObject>> divisionTeamResults = new HashMap<>();
+        processResultsPage(driver, url, divisionTeamResults);
+        Map<String, List<GameData>> games = new HashMap<>();
+        processPoolPlay(driver, url, tourneyName, games);
+        Map<String, List<SeriesData>> series = new HashMap<>();
+        processBracketPlay(driver, url, tourneyName, games, series);
 
         driver.quit();
     }
-    public static void processHomePage(WebDriver driver, String url, String tourneyName){
+    public static void processHomePage(WebDriver driver, String url, String tourneyName, ArrayList<TeamObject> teamObjects){
         try {
             driver.get(url);
             Thread.sleep(2000);
@@ -76,7 +79,6 @@ public class FwangoScraper {
             }
             List<String> uniqueTeamNames = removeDuplicates(newTeamNames);
             List<String> uniquePlayerNames = removeDuplicates(playerNames);
-            List<TeamObject> teamObjects = new ArrayList<>();
             for (int i=0; i<uniqueTeamNames.size(); i++) {
                 String[] parts = uniquePlayerNames.get(i).split(" and ");
                 TeamObject thisTeam = new TeamObject();
@@ -88,15 +90,13 @@ public class FwangoScraper {
                     thisTeam.player2 = secondPlayer;
                     teamObjects.add(thisTeam);
                 }
-                thisTeam.print();
             }
-            System.out.println(uniqueTeamNames.size());
 
         } catch (Exception e) {
             e.printStackTrace();
         } 
     }
-    public static void processResultsPage(WebDriver driver, String url){
+    public static void processResultsPage(WebDriver driver, String url, Map<String, List<TeamResultObject>> divisionTeamResults){
         // Now go to results page
 
            try {
@@ -108,7 +108,6 @@ public class FwangoScraper {
             Thread.sleep(1000);
             // Locate the dropdown button element
             WebElement dropdownButton = driver.findElement(By.className("select-input-container"));
-            Map<String, List<TeamResultObject>> divisionTeamResults = new HashMap<>();
 
             resultsProcessingHelper(driver, "Premier", "//div[@class=' css-1olvhr-option' and text()='Premier 5.0+']", dropdownButton, divisionTeamResults);
             resultsProcessingHelper(driver, "Womens", "//div[@class=' css-1aqxqud-option']", dropdownButton, divisionTeamResults);
@@ -136,16 +135,16 @@ public class FwangoScraper {
             List<TeamResultObject> results = new ArrayList<>();
             getResultsData(driver, results);
             divisionTeamResults.put(division, results);
-            for(TeamResultObject result : results){
-                result.print();
-            }
+            // for(TeamResultObject result : results){
+            //     result.print();
+            // }
         }
         catch (Exception e) {
             e.printStackTrace();
         } 
 
     }
-    public static void processPoolPlay(WebDriver driver, String url, String tournamentName){
+    public static void processPoolPlay(WebDriver driver, String url, String tournamentName, Map<String, List<GameData>> games){
         try{
             driver.get(url);
             Thread.sleep(1000);
@@ -153,7 +152,6 @@ public class FwangoScraper {
             WebElement poolPlayButton = driver.findElement(By.xpath("//*[@id=\"root\"]/span/div[1]/div/div/div[2]/div/div[1]/div[2]/div/div/div/div/nav/ul[2]/li[3]/div/a"));
             poolPlayButton.click();
             Thread.sleep(1000);
-            Map<String, List<GameData>> games = new HashMap<>();
             WebElement dropdownButton = driver.findElement(By.className("select-input-container"));
             poolPlayHelper(driver, "Premier", "//div[@class=' css-1olvhr-option' and text()='Premier 5.0+']", dropdownButton, games, tournamentName);
             poolPlayHelper(driver, "Womens", "//div[@class=' css-1aqxqud-option']", dropdownButton, games, tournamentName);
@@ -193,9 +191,9 @@ public class FwangoScraper {
 
             }
             getPoolPlayData(driver, games, tournamentName);
-            for(GameData game : games){
-                game.print();
-            }
+            // for(GameData game : games){
+            //     game.print();
+            // }
             divisionGameResults.put(division, games);
         }catch (Exception e) {
             e.printStackTrace();
@@ -295,7 +293,7 @@ public class FwangoScraper {
             games.add(thisGame);
         }
     }
-    public static void processBracketPlay(WebDriver driver, String url, String tournamentName){
+    public static void processBracketPlay(WebDriver driver, String url, String tournamentName, Map<String, List<GameData>> games,  Map<String, List<SeriesData>> series){
         try{
             // Going to add a gameData object for each game in the bracket and a series object for each series
             driver.get(url);
@@ -303,9 +301,7 @@ public class FwangoScraper {
             // Locate the bracket play button element
             WebElement bracketPlayButton = driver.findElement(By.xpath("//*[@id=\"root\"]/span/div[1]/div/div/div[2]/div/div[1]/div[2]/div/div/div/div/nav/ul[2]/li[4]/div/a/span/i"));
             bracketPlayButton.click();
-            Thread.sleep(1000);
-            Map<String, List<GameData>> games = new HashMap<>();
-            Map<String, List<SeriesData>> series = new HashMap<>();
+            Thread.sleep(1000);            
             WebElement dropdownButton = driver.findElement(By.className("select-input-container"));
             bracketPlayHelper(driver, "Premier", "//div[@class=' css-1olvhr-option' and text()='Premier 5.0+']", dropdownButton, games, series, tournamentName);
             bracketPlayHelper(driver, "Womens", "//div[@class=' css-1aqxqud-option']", dropdownButton, games, series, tournamentName);
@@ -394,7 +390,7 @@ public class FwangoScraper {
                         thisGameData.tournamentStage = "Bracket play round of " + currentRound + " game " + (i+1);
                         games.add(thisGameData);
                     }
-                    thisSeries.print();
+                    // thisSeries.print();
                 }
             }
             allSeries.put(division, series);
