@@ -21,44 +21,97 @@ import java.util.Set;
 import java.util.regex.*;
 import java.util.Collections;
 import java.util.Comparator;
+import com.opencsv.CSVWriter;
+
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class FwangoScraper {
     public static void main(String[] args) {
         WebDriverManager.chromedriver().driverVersion("114.0.5735.90").setup(); // Setup ChromeDriver automatically
         
         WebDriver driver = new ChromeDriver();
-        String tourneyName = "richmond2023";
-        String url = "https://fwango.io/" + tourneyName;
-        driver.manage().window().setSize(new Dimension(1200, 1000)); // Set window size
+        ArrayList<String> tournamentNames = new ArrayList<>();
+        //tournamentNames.add("saltlakecity2023");
+         tournamentNames.add("richmond2023");
+         //tournamentNames.add("philadelphia2023");
         ArrayList<TeamObject> teamObjects = new ArrayList<>();
-        processHomePage(driver, url, tourneyName, teamObjects);
-        Map<String, List<TeamResultObject>> divisionTeamResults = new HashMap<>();
-        processResultsPage(driver, url, divisionTeamResults, tourneyName);
-        Map<String, List<GameData>> games = new HashMap<>();
-        processPoolPlay(driver, url, tourneyName, games);
-        Map<String, List<SeriesData>> series = new HashMap<>();
-        processBracketPlay(driver, url, tourneyName, games, series);
+        ArrayList<TeamResultObject> divisionTeamResults = new ArrayList<>();
+        ArrayList<GameData> games = new ArrayList<>();
+        ArrayList<SeriesData> series = new ArrayList<>();
+        for(int i=0; i<tournamentNames.size(); i++){
+            String tourneyName = tournamentNames.get(i);
+            String url = "https://fwango.io/" + tourneyName;
+            driver.manage().window().setSize(new Dimension(1200, 1000)); // Set window size
+            processHomePage(driver, url, tourneyName, teamObjects);
+            processResultsPage(driver, url, divisionTeamResults, tourneyName);
+            processPoolPlay(driver, url, tourneyName, games);
+            processBracketPlay(driver, url, tourneyName, games, series);
+        }  
         printData(teamObjects, divisionTeamResults, games, series);
+        writeDataToCSV("teamObjects", "teamObjects.csv", new ArrayList<>(teamObjects));
+        writeDataToCSV("divisionTeamResults", "divisionTeamResults.csv", divisionTeamResults);
+        writeDataToCSV("games", "games.csv", games);
+        writeDataToCSV("series", "series.csv", series);
         driver.quit();
     }
-    public static void printData(ArrayList<TeamObject> teamObjects, Map<String, List<TeamResultObject>> divisionTeamResults, Map<String, List<GameData>> games, Map<String, List<SeriesData>> series){
+    
+    public static void printData(ArrayList<TeamObject> teamObjects, ArrayList<TeamResultObject> divisionTeamResults, ArrayList<GameData> games, ArrayList<SeriesData> series){
         for(TeamObject team : teamObjects){
             team.print();
         }
-        for(String division : divisionTeamResults.keySet()){
-            for(TeamResultObject result : divisionTeamResults.get(division)){
-                result.print();
-            }
+        for(TeamResultObject result : divisionTeamResults){
+            result.print();
         }
-        for(String division : games.keySet()){
-            for(GameData game : games.get(division)){
-                game.print();
-            }
+        for(GameData game : games){
+            game.print();
         }
-        for(String division : series.keySet()){
-            for(SeriesData thisSeries : series.get(division)){
-                thisSeries.print();
+        for(SeriesData thisSeries : series){
+            thisSeries.print();
+        }
+    }
+    public static void writeDataToCSV(String datasetName, String csvFilePath, List<?> dataset) {
+        try (CSVWriter csvWriter = new CSVWriter(new FileWriter(csvFilePath))) {
+            // Write header row based on dataset type
+            if (datasetName.equals("teamObjects")) {
+                csvWriter.writeNext(new String[]{"Player 1", "Player 2", "Team Name", "Tournament"});
+            } else if (datasetName.equals("divisionTeamResults")) {
+                csvWriter.writeNext(new String[]{"Team Name", "Wins", "Losses", "Result", "Division", "Tournament"});
+            } else if (datasetName.equals("games")) {
+                csvWriter.writeNext(new String[]{"Team 1", "Team 2", "Players 1", "Players 2", "Score 1", "Score 2", "Tournament Stage", "Tournament Name", "Division"});
+            } else if (datasetName.equals("series")) {
+                csvWriter.writeNext(new String[]{"Team 1", "Team 2", "Round", "Tournament", "Team 1 Scores", "Team 2 Scores", "Division"});
             }
+
+            // Write data rows
+            for (Object data : dataset) {
+                String[] row = null;
+                if (data instanceof TeamObject) {
+                    row = new String[]{((TeamObject) data).player1, ((TeamObject) data).player2,
+                                      ((TeamObject) data).teamName, ((TeamObject) data).tournament};
+                } else if (data instanceof TeamResultObject) {
+                    row = new String[]{((TeamResultObject) data).teamName, String.valueOf(((TeamResultObject) data).wins),
+                                      String.valueOf(((TeamResultObject) data).losses), String.valueOf(((TeamResultObject) data).result),
+                                      ((TeamResultObject) data).division, ((TeamResultObject) data).tournament};
+                } else if (data instanceof GameData) {
+                    row = new String[]{((GameData) data).team1, ((GameData) data).team2,
+                                      ((GameData) data).t1p1 + ", " + ((GameData) data).t1p2,
+                                      ((GameData) data).t2p1 + ", " + ((GameData) data).t2p2,
+                                      String.valueOf(((GameData) data).t1Points), String.valueOf(((GameData) data).t2Points),
+                                      ((GameData) data).tournamentStage, ((GameData) data).tournamentName, ((GameData) data).division};
+                } else if (data instanceof SeriesData) {
+                    row = new String[]{((SeriesData) data).team1, ((SeriesData) data).team2,
+                                      ((SeriesData) data).round, ((SeriesData) data).tournament,
+                                      ((SeriesData) data).t1Scores.toString(), ((SeriesData) data).t2Scores.toString(),
+                                      ((SeriesData) data).division};
+                }
+
+                csvWriter.writeNext(row);
+            }
+
+            csvWriter.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
     public static void processHomePage(WebDriver driver, String url, String tourneyName, ArrayList<TeamObject> teamObjects){
@@ -117,7 +170,7 @@ public class FwangoScraper {
             e.printStackTrace();
         } 
     }
-    public static void processResultsPage(WebDriver driver, String url, Map<String, List<TeamResultObject>> divisionTeamResults, String tournament){
+    public static void processResultsPage(WebDriver driver, String url, ArrayList<TeamResultObject> divisionTeamResults, String tournament){
         // Now go to results page
 
            try {
@@ -142,7 +195,7 @@ public class FwangoScraper {
             e.printStackTrace();
         } 
     }
-    public static void resultsProcessingHelper(WebDriver driver, String division, String xpath, WebElement dropdownButton, Map<String, List<TeamResultObject>> divisionTeamResults, String tournament){
+    public static void resultsProcessingHelper(WebDriver driver, String division, String xpath, WebElement dropdownButton, ArrayList<TeamResultObject> divisionTeamResults, String tournament){
         try{
             // Click on the dropdown button
             dropdownButton.click();
@@ -155,7 +208,7 @@ public class FwangoScraper {
             Thread.sleep(1000);
             List<TeamResultObject> results = new ArrayList<>();
             getResultsData(driver, results, division, tournament);
-            divisionTeamResults.put(division, results);
+            divisionTeamResults.addAll(results);
             // for(TeamResultObject result : results){
             //     result.print();
             // }
@@ -196,7 +249,7 @@ public class FwangoScraper {
             teamResults.add(thisResult);
         }
     }
-    public static void processPoolPlay(WebDriver driver, String url, String tournamentName, Map<String, List<GameData>> games){
+    public static void processPoolPlay(WebDriver driver, String url, String tournamentName, ArrayList<GameData> games){
         try{
             driver.get(url);
             Thread.sleep(1000);
@@ -217,7 +270,7 @@ public class FwangoScraper {
             e.printStackTrace();
         } 
     }
-    public static void poolPlayHelper(WebDriver driver, String division, String xpath, WebElement dropdownButton, Map<String, List<GameData>> divisionGameResults, String tournamentName){
+    public static void poolPlayHelper(WebDriver driver, String division, String xpath, WebElement dropdownButton, ArrayList<GameData> divisionGameResults, String tournamentName){
         try{
              // Click on the dropdown button
             dropdownButton.click();
@@ -246,7 +299,7 @@ public class FwangoScraper {
             // for(GameData game : games){
             //     game.print();
             // }
-            divisionGameResults.put(division, games);
+            divisionGameResults.addAll(games);
         }catch (Exception e) {
             e.printStackTrace();
         } 
@@ -308,7 +361,7 @@ public class FwangoScraper {
             games.add(thisGame);
         }
     }
-    public static void processBracketPlay(WebDriver driver, String url, String tournamentName, Map<String, List<GameData>> games,  Map<String, List<SeriesData>> series){
+    public static void processBracketPlay(WebDriver driver, String url, String tournamentName, ArrayList<GameData> games,  ArrayList<SeriesData> series){
         try{
             // Going to add a gameData object for each game in the bracket and a series object for each series
             driver.get(url);
@@ -331,7 +384,7 @@ public class FwangoScraper {
         } 
         
     }
-    public static void bracketPlayHelper(WebDriver driver, String division, String xpath, WebElement dropDownButton, Map<String, List<GameData>> allGames, Map<String, List<SeriesData>> allSeries, String tournamentName){
+    public static void bracketPlayHelper(WebDriver driver, String division, String xpath, WebElement dropDownButton, ArrayList<GameData> allGames, ArrayList<SeriesData> allSeries, String tournamentName){
         try{
             // Click on the dropdown button
             dropDownButton.click();
@@ -411,8 +464,8 @@ public class FwangoScraper {
                     // thisSeries.print();
                 }
             }
-            allSeries.put(division, series);
-            allGames.put(division, games);
+            allSeries.addAll(series);
+            allGames.addAll(games);
         }
         catch (Exception e) {
             e.printStackTrace();
