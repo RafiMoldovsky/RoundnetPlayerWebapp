@@ -2,7 +2,8 @@ HELP.md
 series.csv
 games.csv
 divisionTeamResults.csv
-teamObjects.series.csv
+teamObjects.csv
+tournaments.csv
 .gradle
 build/
 !gradle/wrapper/gradle-wrapper.jar

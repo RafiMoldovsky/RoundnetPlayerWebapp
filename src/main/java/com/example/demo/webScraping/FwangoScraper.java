@@ -31,19 +31,21 @@ public class FwangoScraper {
         WebDriverManager.chromedriver().driverVersion("114.0.5735.90").setup(); // Setup ChromeDriver automatically
         
         WebDriver driver = new ChromeDriver();
-        ArrayList<String> tournamentNames = new ArrayList<>();
-        //tournamentNames.add("saltlakecity2023");
+         ArrayList<String> tournamentNames = new ArrayList<>();
+        tournamentNames.add("saltlakecity2023");
          tournamentNames.add("richmond2023");
          tournamentNames.add("philadelphia2023");
+         //tournamentNames.add("scgrandslam2023");
         ArrayList<TeamObject> teamObjects = new ArrayList<>();
         ArrayList<TeamResultObject> divisionTeamResults = new ArrayList<>();
         ArrayList<GameData> games = new ArrayList<>();
         ArrayList<SeriesData> series = new ArrayList<>();
+        ArrayList<TournamentData> tournamentObjects = new ArrayList<>();
         for(int i=0; i<tournamentNames.size(); i++){
             String tourneyName = tournamentNames.get(i);
             String url = "https://fwango.io/" + tourneyName;
             driver.manage().window().setSize(new Dimension(1200, 1000)); // Set window size
-            processHomePage(driver, url, tourneyName, teamObjects);
+            processHomePage(driver, url, tourneyName, teamObjects, tournamentObjects);
             processResultsPage(driver, url, divisionTeamResults, tourneyName);
             processPoolPlay(driver, url, tourneyName, games);
             processBracketPlay(driver, url, tourneyName, games, series);
@@ -53,6 +55,7 @@ public class FwangoScraper {
         writeDataToCSV("divisionTeamResults", "divisionTeamResults.csv", divisionTeamResults);
         writeDataToCSV("games", "games.csv", games);
         writeDataToCSV("series", "series.csv", series);
+        writeDataToCSV("tournaments", "tournaments.csv", tournamentObjects);
         driver.quit();
     }
     
@@ -82,6 +85,9 @@ public class FwangoScraper {
             } else if (datasetName.equals("series")) {
                 csvWriter.writeNext(new String[]{"Team 1", "Team 2", "Round", "Tournament", "Team 1 Scores", "Team 2 Scores", "Division"});
             }
+            else if (datasetName.equals("tournaments")) {
+                csvWriter.writeNext(new String[]{"Tournament Name", "URL", "Date"});
+            }
 
             // Write data rows
             for (Object data : dataset) {
@@ -104,7 +110,10 @@ public class FwangoScraper {
                                       ((SeriesData) data).round, ((SeriesData) data).tournament,
                                       ((SeriesData) data).t1Scores.toString(), ((SeriesData) data).t2Scores.toString(),
                                       ((SeriesData) data).division};
-                }
+                } else if (data instanceof TournamentData) {
+                    row = new String[]{((TournamentData) data).name, String.valueOf(((TournamentData) data).url),
+                                      String.valueOf(((TournamentData) data).date)};
+                    }
 
                 csvWriter.writeNext(row);
             }
@@ -114,7 +123,7 @@ public class FwangoScraper {
             e.printStackTrace();
         }
     }
-    public static void processHomePage(WebDriver driver, String url, String tourneyName, ArrayList<TeamObject> teamObjects){
+    public static void processHomePage(WebDriver driver, String url, String tourneyName, ArrayList<TeamObject> teamObjects, ArrayList<TournamentData> tournamentObjects){
         try {
             driver.get(url);
             Thread.sleep(2000);
@@ -130,6 +139,7 @@ public class FwangoScraper {
             thisTournament.date = tourneyDateElement.getText();
             thisTournament.name = tourneyName;
             thisTournament.url = url;
+            tournamentObjects.add(thisTournament);
             // Find and print initially loaded team names
             List<String> newTeamNames = new ArrayList<>();
             List<String> playerNames = new ArrayList<>();
