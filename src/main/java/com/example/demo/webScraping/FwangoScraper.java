@@ -356,7 +356,13 @@ public class FwangoScraper {
                         isfinal = false;
                     }
                     List<WebElement> teamNameElements = seriesElement.findElements(By.className("team-name"));
-                    List<WebElement> scoreElements = seriesElement.findElement(By.className("games-container")).findElements(By.cssSelector("[type='number']"));
+                    List<WebElement> scoreElements = new ArrayList<>();
+                    try{
+                        scoreElements = seriesElement.findElement(By.className("games-container")).findElements(By.cssSelector("[type='number']"));
+                    } catch(Exception e){
+                        // this might result in an exception, in the case that there's a bye - in which case skip this series
+                        continue; 
+                    }
                     String team1 = teamNameElements.get(0).getText();
                     String team2 = teamNameElements.get(1).getText();
                     ArrayList<Integer> t1Scores = new ArrayList<>();
