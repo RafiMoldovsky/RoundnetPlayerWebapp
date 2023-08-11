@@ -229,7 +229,7 @@ public class FwangoScraper {
             e.printStackTrace();
         } 
     }
-    public static void processPoolPlay(WebDriver driver, String url, String tourneyName){
+    public static void processPoolPlay(WebDriver driver, String url, String tournamentName){
         try{
             driver.get(url);
             Thread.sleep(1000);
@@ -238,7 +238,7 @@ public class FwangoScraper {
             poolPlayButton.click();
             Thread.sleep(1000);
             List<GameData> games = new ArrayList<>();
-            getPoolPlayData(driver, games);
+            getPoolPlayData(driver, games, tournamentName);
             // Scroll and load more content
             WebElement container = driver.findElement(By.cssSelector("#body-scroll > div > div > div.infinite-scroll-component__outerdiv"));
             long startTime = System.currentTimeMillis();
@@ -251,7 +251,7 @@ public class FwangoScraper {
                     .scrollFromOrigin(WheelInput.ScrollOrigin.fromElement(container), 0, deltaY)
                     .perform();
 
-                getPoolPlayData(driver, games);
+                getPoolPlayData(driver, games, tournamentName);
             }
             Set<GameData> seenGames = new HashSet<>();
             List<GameData> uniqueGames = new ArrayList<>();
@@ -306,20 +306,22 @@ public class FwangoScraper {
             records.add(record);
         }
     }
-    public static void getPoolPlayData(WebDriver driver, List<GameData> games){
+    public static void getPoolPlayData(WebDriver driver, List<GameData> games, String tournamentName){
         // These will all match in terms of order of items
         List<WebElement> teamElements = driver.findElements(By.className("teams-container"));
         List<WebElement> pointElements = driver.findElements(By.className("games-container"));
         for(int i=0; i<teamElements.size(); i++){
             List<WebElement> nameElements = teamElements.get(i).findElements(By.className("team-name"));
             List<WebElement> scoreElement = pointElements.get(i).findElements(By.cssSelector("[type='number']"));
-            System.out.println(nameElements.get(0).getText() + " " + scoreElement.get(0).getAttribute("value"));
-            System.out.println(nameElements.get(1).getText() + " " + scoreElement.get(1).getAttribute("value"));
+            // System.out.println(nameElements.get(0).getText() + " " + scoreElement.get(0).getAttribute("value"));
+            // System.out.println(nameElements.get(1).getText() + " " + scoreElement.get(1).getAttribute("value"));
             GameData thisGame = new GameData();
             thisGame.team1 = nameElements.get(0).getText();
             thisGame.team2 = nameElements.get(1).getText();
             thisGame.t1Points = Integer.parseInt(scoreElement.get(0).getAttribute("value"));
             thisGame.t2Points = Integer.parseInt(scoreElement.get(1).getAttribute("value"));
+            thisGame.tournamentStage = "Pool Play";
+            thisGame.tournamentName = tournamentName;
             games.add(thisGame);
         }
     }
