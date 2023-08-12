@@ -32,12 +32,12 @@ public class FwangoScraper {
         WebDriverManager.chromedriver().driverVersion("114.0.5735.90").setup(); // Setup ChromeDriver automatically
         
         WebDriver driver = new ChromeDriver();
-         ArrayList<String> tournamentNames = new ArrayList<>();
-         // tournamentNames.add("saltlakecity2023");
-         // tournamentNames.add("richmond2023");
-          // tournamentNames.add("philadelphia2023");
-          tournamentNames.add("scgrandslam2023");
-        //tournamentNames.add("thepeopleschampionship");  
+        ArrayList<String> tournamentNames = new ArrayList<>();
+        tournamentNames.add("saltlakecity2023");
+        tournamentNames.add("richmond2023");
+        tournamentNames.add("philadelphia2023");
+        tournamentNames.add("scgrandslam2023");
+        tournamentNames.add("thepeopleschampionship");  
         ArrayList<TeamObject> teamObjects = new ArrayList<>();
         ArrayList<TeamResultObject> divisionTeamResults = new ArrayList<>();
         ArrayList<GameData> games = new ArrayList<>();
@@ -47,10 +47,10 @@ public class FwangoScraper {
             String tourneyName = tournamentNames.get(i);
             String url = "https://fwango.io/" + tourneyName;
             driver.manage().window().setSize(new Dimension(1200, 1000)); // Set window size
-            //processHomePage(driver, url, tourneyName, teamObjects, tournamentObjects);
-            processResultsPage(driver, url, divisionTeamResults, tourneyName);
-           // processPoolPlay(driver, url, tourneyName, games);
-            processBracketPlay(driver, url, tourneyName, games, series);
+            processHomePage(driver, url, tourneyName, teamObjects, tournamentObjects);
+            //processResultsPage(driver, url, divisionTeamResults, tourneyName);
+            //processPoolPlay(driver, url, tourneyName, games);
+            //processBracketPlay(driver, url, tourneyName, games, series);
         }  
         printData(teamObjects, divisionTeamResults, games, series);
         writeDataToCSV("teamObjects", "teamObjects.csv", new ArrayList<>(teamObjects));
@@ -162,15 +162,16 @@ public class FwangoScraper {
                 getTeamNames(driver, newTeamNames,lastLoadedTeamName, playerNames);
                 lastLoadedTeamName = newTeamNames.get(newTeamNames.size() - 1);   
             }
-            List<String> uniqueTeamNames = removeDuplicates(newTeamNames);
-            List<String> uniquePlayerNames = removeDuplicates(playerNames);
-            for (int i=0; i<uniqueTeamNames.size(); i++) {
-                String[] parts = uniquePlayerNames.get(i).split(" and ");
+            List<String> uniquePlayerNamesAndTeamNames = removeNonUniqueCombinations(playerNames, newTeamNames);
+            for (int i=0; i<uniquePlayerNamesAndTeamNames.size(); i++) {
+                System.out.println(uniquePlayerNamesAndTeamNames.get(i));
+                String[] parts1 = uniquePlayerNamesAndTeamNames.get(i).split("UNIQUESPLITTERDONOTREPEAT");
+                String[] parts2 = parts1[0].split(" and ");
                 TeamObject thisTeam = new TeamObject();
-                thisTeam.teamName = uniqueTeamNames.get(i);
-                if (parts.length == 2) {
-                    String firstPlayer = parts[0].toLowerCase();
-                    String secondPlayer = parts[1].toLowerCase();
+                thisTeam.teamName = parts1[1];
+                if (parts2.length == 2) {
+                    String firstPlayer = parts2[0].toLowerCase();
+                    String secondPlayer = parts2[1].toLowerCase();
                     thisTeam.player1 = firstPlayer;
                     thisTeam.player2 = secondPlayer;
                     thisTeam.tournament = tourneyName;
@@ -346,17 +347,18 @@ public class FwangoScraper {
         }
         return teamNames;
     }
-    public static List<String> removeDuplicates(List<String> inputList) {
-        Set<String> uniqueSet = new HashSet<>();
-        List<String> uniqueList = new ArrayList<>();
-
-        for (String item : inputList) {
-            if (uniqueSet.add(item)) {
-                uniqueList.add(item);
+    public static List<String> removeNonUniqueCombinations(List<String> playerNames, List<String> teamNames) {
+        Set<String> uniqueCombinations = new HashSet<>();
+        List<String> nonUniqueCombinations = new ArrayList<>();
+    
+        for (int i = 0; i < playerNames.size(); i++) {
+            String combination = playerNames.get(i) + "UNIQUESPLITTERDONOTREPEAT" + teamNames.get(i);
+            if (uniqueCombinations.add(combination)) {
+                nonUniqueCombinations.add(combination);
             }
         }
-
-        return uniqueList;
+    
+        return nonUniqueCombinations;
     }
     public static int extractNumber(String input) {
         Pattern pattern = Pattern.compile("\\d+");
