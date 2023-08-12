@@ -28,6 +28,7 @@ import java.io.IOException;
 
 public class FwangoScraper {
     public static int thisTournamentsReactNumber = 0;
+    public static boolean quiet = true;
     public static void main(String[] args) {
         WebDriverManager.chromedriver().driverVersion("114.0.5735.90").setup(); // Setup ChromeDriver automatically
         
@@ -38,26 +39,56 @@ public class FwangoScraper {
         tournamentNames.add("philadelphia2023");
         tournamentNames.add("scgrandslam2023");
         tournamentNames.add("thepeopleschampionship");  
+        tournamentNames.add("heatwavevi");
+        tournamentNames.add("rivercup");
+        tournamentNames.add("ers23md");
+        tournamentNames.add("nashvillecup2023");
+        tournamentNames.add("etslondon2023");
+        tournamentNames.add("windy-city-classic-23");
+        tournamentNames.add("coupeestivale");
+        tournamentNames.add("long-island-classic-2023");
+        tournamentNames.add("sts23portlandopen");
+        tournamentNames.add("toulouse2023");
+        tournamentNames.add("ers23nova");
+        tournamentNames.add("sdgrandslam2023");
+        tournamentNames.add("queencityclassic2023");
+        tournamentNames.add("stockholm");
+        tournamentNames.add("atlslam23");
+        tournamentNames.add("etsprague2023");
+        tournamentNames.add("tograndslam2023");
         ArrayList<TeamObject> teamObjects = new ArrayList<>();
         ArrayList<TeamResultObject> divisionTeamResults = new ArrayList<>();
         ArrayList<GameData> games = new ArrayList<>();
         ArrayList<SeriesData> series = new ArrayList<>();
         ArrayList<TournamentData> tournamentObjects = new ArrayList<>();
+        long programStartTime = System.currentTimeMillis();
         for(int i=0; i<tournamentNames.size(); i++){
+            long startTime = System.currentTimeMillis();
+            System.out.println("Currently working on: " + tournamentNames.get(i) + " (" + (i+1) + " out of " + tournamentNames.size() + ")");
             String tourneyName = tournamentNames.get(i);
             String url = "https://fwango.io/" + tourneyName;
             driver.manage().window().setSize(new Dimension(1200, 1000)); // Set window size
+            System.out.println("Working on home page");
             processHomePage(driver, url, tourneyName, teamObjects, tournamentObjects);
-            //processResultsPage(driver, url, divisionTeamResults, tourneyName);
-            //processPoolPlay(driver, url, tourneyName, games);
-            //processBracketPlay(driver, url, tourneyName, games, series);
+            System.out.println("Working on results page");
+            processResultsPage(driver, url, divisionTeamResults, tourneyName);
+            System.out.println("Working on pool play page");
+            processPoolPlay(driver, url, tourneyName, games);
+            System.out.println("Working on bracket play page");
+            processBracketPlay(driver, url, tourneyName, games, series);
+            long endTime = System.currentTimeMillis(); // Capture end time
+            long elapsedTime = endTime - startTime; // Calculate elapsed time
+            System.out.println("Iteration took " + elapsedTime + " milliseconds");
         }  
-        printData(teamObjects, divisionTeamResults, games, series);
+        //printData(teamObjects, divisionTeamResults, games, series);
         writeDataToCSV("teamObjects", "teamObjects.csv", new ArrayList<>(teamObjects));
         writeDataToCSV("divisionTeamResults", "divisionTeamResults.csv", divisionTeamResults);
         writeDataToCSV("games", "games.csv", games);
         writeDataToCSV("series", "series.csv", series);
         writeDataToCSV("tournaments", "tournaments.csv", tournamentObjects);
+        long programEndTime = System.currentTimeMillis(); // Capture end time
+        long programElapsedTime = programEndTime - programStartTime; // Calculate elapsed time
+        System.out.println(tournamentNames.size() + " tournaments took " + programElapsedTime + " milliseconds");
         driver.quit();
     }
     
@@ -122,7 +153,7 @@ public class FwangoScraper {
 
             csvWriter.flush();
         } catch (IOException e) {
-            e.printStackTrace();
+            if(!quiet){e.printStackTrace();}
         }
     }
     public static void processHomePage(WebDriver driver, String url, String tourneyName, ArrayList<TeamObject> teamObjects, ArrayList<TournamentData> tournamentObjects){
@@ -178,7 +209,7 @@ public class FwangoScraper {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            if(!quiet){e.printStackTrace();}
         } 
     }
     public static void processResultsPage(WebDriver driver, String url, ArrayList<TeamResultObject> divisionTeamResults, String tournament){
@@ -197,7 +228,7 @@ public class FwangoScraper {
             resultsProcessingHelper(driver, dropdownButton, divisionTeamResults, tournament);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            if(!quiet){e.printStackTrace();}
         } 
     }
     public static void resultsProcessingHelper(WebDriver driver, WebElement dropdownButton, ArrayList<TeamResultObject> divisionTeamResults, String tournament){
@@ -237,7 +268,7 @@ public class FwangoScraper {
 
         }
         catch (Exception e) {
-            e.printStackTrace();
+            if(!quiet){e.printStackTrace();}
         } 
 
     }
@@ -284,7 +315,7 @@ public class FwangoScraper {
             poolPlayHelper(driver, dropdownButton, games, tournamentName);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            if(!quiet){e.printStackTrace();}
         } 
     }
     public static void poolPlayHelper(WebDriver driver, WebElement dropdownButton, ArrayList<GameData> divisionGameResults, String tournamentName){
@@ -326,7 +357,7 @@ public class FwangoScraper {
                     }
                 }
         }catch (Exception e) {
-            e.printStackTrace();
+            if(!quiet){e.printStackTrace();}
         } 
        
     }
@@ -400,7 +431,7 @@ public class FwangoScraper {
             bracketPlayHelper(driver, dropdownButton, games, series, tournamentName);
         }
         catch (Exception e) {
-            e.printStackTrace();
+            if(!quiet){e.printStackTrace();}
         } 
         
     }
@@ -507,7 +538,7 @@ public class FwangoScraper {
                 }
         }
         catch (Exception e) {
-            e.printStackTrace();
+            if(!quiet){e.printStackTrace();}
         } 
     }
 }
