@@ -136,7 +136,6 @@ public class FwangoScraper {
             
             // Get tournament date: 
             WebElement tourneyDateElement = driver.findElement(By.className("date"));
-            // System.out.println("Tournament date: " + tourneyDateElement.getText());
             TournamentData thisTournament = new TournamentData();
             thisTournament.date = tourneyDateElement.getText();
             thisTournament.name = tourneyName;
@@ -164,7 +163,6 @@ public class FwangoScraper {
             }
             List<String> uniquePlayerNamesAndTeamNames = removeNonUniqueCombinations(playerNames, newTeamNames);
             for (int i=0; i<uniquePlayerNamesAndTeamNames.size(); i++) {
-                System.out.println(uniquePlayerNamesAndTeamNames.get(i));
                 String[] parts1 = uniquePlayerNamesAndTeamNames.get(i).split("UNIQUESPLITTERDONOTREPEAT");
                 String[] parts2 = parts1[0].split(" and ");
                 TeamObject thisTeam = new TeamObject();
@@ -313,7 +311,6 @@ public class FwangoScraper {
                         long durationMillis = 4000; // 4 seconds
 
                         while (System.currentTimeMillis() - startTime < durationMillis) {
-                            // System.out.println("new scroll " + games.size());
                             int deltaY = 10000; // Adjust the scroll amount as needed
                             new Actions(driver)
                                 .scrollFromOrigin(WheelInput.ScrollOrigin.fromElement(container), 0, deltaY)
