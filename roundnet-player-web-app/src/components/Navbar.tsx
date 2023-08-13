@@ -2,7 +2,7 @@ import Link from "next/link"
 
 export default function Navbar() {
   return (
-    <>
+    <div className="flex justify-around my-10 text-lg font-semibold">
       <Link href={"/"}>
         <button>
           Home
@@ -18,6 +18,6 @@ export default function Navbar() {
           Players
         </button>
       </Link>
-    </>
+    </div>
   )
 }
