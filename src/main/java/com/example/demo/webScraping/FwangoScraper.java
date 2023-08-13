@@ -12,15 +12,10 @@ import org.openqa.selenium.interactions.WheelInput;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.regex.*;
-import java.util.Collections;
-import java.util.Comparator;
 import com.opencsv.CSVWriter;
 
 import java.io.FileWriter;

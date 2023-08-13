@@ -1,6 +1,5 @@
 package com.example.demo.webScraping;
 import java.util.ArrayList;
-import java.util.List;
 public class SeriesData {
     public String team1;
     public String team2;
