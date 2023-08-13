@@ -3,7 +3,7 @@ import { useState } from "react"
 import { players, playerInterface } from "../../../data/players";
 import Link from "next/link";
 
-export default function Players(){
+export default function PlayersPage(){
   // state to control player search value
   const [searchInput, setSearchInput] = useState('');
 
@@ -12,22 +12,21 @@ export default function Players(){
 
   for (var i in players) {
     if(players[i].name.toLowerCase().includes(searchInput.toLowerCase())){
-      console.log(players[i].name);
       searchedPlayers.push(players[i]);
     }
   }
   
   return(
-    <>
+    <div className="flex flex-col items-center">
       <div>Players</div>
       <input className="border border-black" placeholder="Enter Player's Name" value={searchInput} onChange={(e) => setSearchInput(e.target.value)}/>
       {searchedPlayers.map(player => 
         <Link key={player.name} href={`/players/${player.name}`}>
-          <div>
+          <div className="text-gray-700 hover:text-black">
             {player.name}
           </div>
         </Link>
       )}
-    </>
+    </div>
   )
 }
