@@ -78,6 +78,10 @@ public class FwangoScraper {
             processBracketPlay(driver, url, tourneyName, games, series);
             long endTime = System.currentTimeMillis(); // Capture end time
             long elapsedTime = endTime - startTime; // Calculate elapsed time
+            System.out.println(teamObjects.size() + " teams");
+            System.out.println(divisionTeamResults.size() + " records");
+            System.out.println(games.size() + " games");
+            System.out.println(series.size() + " series");
             System.out.println("Iteration took " + elapsedTime + " milliseconds");
         }  
         //printData(teamObjects, divisionTeamResults, games, series);
