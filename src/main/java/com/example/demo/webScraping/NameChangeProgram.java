@@ -7,8 +7,8 @@ import java.sql.SQLException;
 
 public class NameChangeProgram {
     public static void main(String[] args) {
-        String originalName = "GFD Rogue";
-        String newName = "Rogue";
+        String originalName = "Kunzelmachin\u00EF\u00BF\u00BDs";
+        String newName = "Kunzelmachin\u00E8s";
         String jdbcUrl = "exampleURL";
         String username = "exampleUsername";
         String password = "examplePass";
@@ -19,6 +19,7 @@ public class NameChangeProgram {
             updateTeamName(connection, originalName, newName, "series", "team_1");
             updateTeamName(connection, originalName, newName, "series", "team_2");
             updateTeamName(connection, originalName, newName, "records", "team_name");
+            updateTeamName(connection, originalName, newName, "teams", "team_name");
             System.out.println("Name changes completed successfully.");
         } catch (SQLException e) {
             e.printStackTrace();

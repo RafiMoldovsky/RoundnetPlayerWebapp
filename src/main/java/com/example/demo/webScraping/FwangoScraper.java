@@ -36,7 +36,7 @@ public class FwangoScraper {
         // tournamentNames.add("thepeopleschampionship");  
         // tournamentNames.add("heatwavevi");
         // tournamentNames.add("rivercup");
-        // tournamentNames.add("ers23md");
+         tournamentNames.add("ers23md");
         // tournamentNames.add("nashvillecup2023");
         // tournamentNames.add("etslondon2023");
         // tournamentNames.add("windy-city-classic-23");
@@ -44,10 +44,10 @@ public class FwangoScraper {
         // tournamentNames.add("long-island-classic-2023");
         // tournamentNames.add("sts23portlandopen");
         // tournamentNames.add("toulouse2023");
-        // tournamentNames.add("ers23nova");
+         tournamentNames.add("ers23nova");
         // tournamentNames.add("sdgrandslam2023");
         // tournamentNames.add("queencityclassic2023");
-         tournamentNames.add("stockholm");
+        // tournamentNames.add("stockholm");
         // tournamentNames.add("atlslam23");
         // tournamentNames.add("etsprague2023");
         // tournamentNames.add("tograndslam2023");
@@ -405,11 +405,21 @@ public class FwangoScraper {
         for(int i=0; i<teamElements.size(); i++){
             List<WebElement> nameElements = teamElements.get(i).findElements(By.className("team-name"));
             List<WebElement> scoreElement = pointElements.get(i).findElements(By.cssSelector("[type='number']"));
-            GameData thisGame = new GameData();
-            thisGame.team1 = nameElements.get(0).getText();
-            thisGame.team2 = nameElements.get(1).getText();
-            thisGame.t1Points = Integer.parseInt(scoreElement.get(0).getAttribute("value"));
-            thisGame.t2Points = Integer.parseInt(scoreElement.get(1).getAttribute("value"));
+            GameData thisGame = new GameData(); 
+            try{
+                thisGame.team1 = nameElements.get(0).getText();            }
+            catch(Exception e){
+
+            }
+            try{
+                thisGame.team2 = nameElements.get(1).getText();
+            }
+            catch(Exception e){}
+            try{
+                thisGame.t1Points = Integer.parseInt(scoreElement.get(0).getAttribute("value"));
+                thisGame.t2Points = Integer.parseInt(scoreElement.get(1).getAttribute("value"));
+            }
+            catch(Exception e){} 
             thisGame.tournamentStage = "Pool Play";
             thisGame.tournamentName = tournamentName;
             thisGame.division=division;
