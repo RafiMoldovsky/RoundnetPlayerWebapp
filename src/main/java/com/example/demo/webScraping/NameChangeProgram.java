@@ -7,11 +7,11 @@ import java.sql.SQLException;
 
 public class NameChangeProgram {
     public static void main(String[] args) {
-        String originalName = "Kunzelmachin\u00EF\u00BF\u00BDs";
-        String newName = "Kunzelmachin\u00E8s";
-        String jdbcUrl = "exampleURL";
-        String username = "exampleUsername";
-        String password = "examplePass";
+        String originalName = "2k'";
+        String newName = "2k\u2022";
+        String jdbcUrl = "jdbc:postgresql://mahmud.db.elephantsql.com:5432/qwjqdpav";
+        String username = "qwjqdpav";
+        String password = "RUgzDe5vDvda80Y1hv2RUhU8XVo75M-D";
 
         try (Connection connection = DriverManager.getConnection(jdbcUrl, username, password)) {
             updateTeamName(connection, originalName, newName, "games", "team_1");
