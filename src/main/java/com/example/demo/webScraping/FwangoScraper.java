@@ -36,7 +36,7 @@ public class FwangoScraper {
         // tournamentNames.add("thepeopleschampionship");  
         // tournamentNames.add("heatwavevi");
         // tournamentNames.add("rivercup");
-         tournamentNames.add("ers23md");
+         //tournamentNames.add("ers23md");
         // tournamentNames.add("nashvillecup2023");
         // tournamentNames.add("etslondon2023");
         // tournamentNames.add("windy-city-classic-23");
@@ -44,13 +44,13 @@ public class FwangoScraper {
         // tournamentNames.add("long-island-classic-2023");
         // tournamentNames.add("sts23portlandopen");
         // tournamentNames.add("toulouse2023");
-         tournamentNames.add("ers23nova");
+         //tournamentNames.add("ers23nova");
         // tournamentNames.add("sdgrandslam2023");
         // tournamentNames.add("queencityclassic2023");
         // tournamentNames.add("stockholm");
         // tournamentNames.add("atlslam23");
         // tournamentNames.add("etsprague2023");
-        // tournamentNames.add("tograndslam2023");
+         tournamentNames.add("tograndslam2023");
         ArrayList<TeamObject> teamObjects = new ArrayList<>();
         ArrayList<TeamResultObject> divisionTeamResults = new ArrayList<>();
         ArrayList<GameData> games = new ArrayList<>();
@@ -64,13 +64,13 @@ public class FwangoScraper {
             String url = "https://fwango.io/" + tourneyName;
             driver.manage().window().setSize(new Dimension(1200, 1400)); // Set window size
             System.out.println("Working on home page");
-            processHomePage(driver, url, tourneyName, teamObjects, tournamentObjects);
+           // processHomePage(driver, url, tourneyName, teamObjects, tournamentObjects);
             System.out.println("Working on results page");
-           // processResultsPage(driver, url, divisionTeamResults, tourneyName);
+            processResultsPage(driver, url, divisionTeamResults, tourneyName);
             System.out.println("Working on pool play page");
-           // processPoolPlay(driver, url, tourneyName, games);
+            processPoolPlay(driver, url, tourneyName, games);
             System.out.println("Working on bracket play page");
-           // processBracketPlay(driver, url, tourneyName, games, series);
+            processBracketPlay(driver, url, tourneyName, games, series);
             long endTime = System.currentTimeMillis(); // Capture end time
             long elapsedTime = endTime - startTime; // Calculate elapsed time
             System.out.println(teamObjects.size() + " teams");
@@ -298,20 +298,26 @@ public class FwangoScraper {
                 thisResult.result = i+1;
             }
             else if(rankElements.size()!=0){
-                thisResult.result = Integer.valueOf(rankElements.get(i).getText());
+                try{
+                    thisResult.result = Integer.valueOf(rankElements.get(i).getText());
+                }
+                catch(Exception e){}
             }
             String teamName = teamNameElements.get(i).getText();
             String record = recordElements.get(i).getText();
-            String[] parts = record.split(" - ");
             thisResult.teamName = teamName;
-            if (parts.length == 2) {
+            try{
+                String[] parts = record.split(" - ");
+                if (parts.length == 2) {
                 int wins = extractNumber(parts[0]);
                 int losses = extractNumber(parts[1]);
                 thisResult.wins = wins;
-                thisResult.losses = losses;
-                thisResult.division = division;
-                thisResult.tournament = tournament;
-            }
+                thisResult.losses = losses; 
+                }
+            } catch(Exception e){}
+            
+            thisResult.division = division;
+            thisResult.tournament = tournament;
             teamResults.add(thisResult);
         }
     }
