@@ -7,8 +7,8 @@ import java.sql.SQLException;
 
 public class NameChangeProgram {
     public static void main(String[] args) {
-        String originalName = "Kunzelmachin\u00EF\u00BF\u00BDs";
-        String newName = "Kunzelmachin\u00E8s";
+        String originalName = "2k'";
+        String newName = "2k\u2022";
         String jdbcUrl = "exampleURL";
         String username = "exampleUsername";
         String password = "examplePass";

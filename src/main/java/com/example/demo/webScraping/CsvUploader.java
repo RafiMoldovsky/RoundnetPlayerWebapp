@@ -14,8 +14,8 @@ import java.sql.Date;
 
 public class CsvUploader {
     public static void main(String[] args) {
-        String csvFilePath = "teamObjects.csv"; // Change this to the desired CSV file
-        String tableName = "teams"; // Change this to the desired table name
+        String csvFilePath = "games.csv"; // Change this to the desired CSV file
+        String tableName = "games"; // Change this to the desired table name
         String jdbcUrl = "exampleURL";
         String username = "exampleUsername";
         String password = "examplePass";
