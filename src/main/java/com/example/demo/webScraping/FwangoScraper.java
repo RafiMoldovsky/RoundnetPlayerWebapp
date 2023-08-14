@@ -23,34 +23,34 @@ import java.io.IOException;
 
 public class FwangoScraper {
     public static int thisTournamentsReactNumber = 0;
-    public static boolean quiet = true;
+    public static boolean quiet = false;
     public static void main(String[] args) {
         WebDriverManager.chromedriver().driverVersion("114.0.5735.90").setup(); // Setup ChromeDriver automatically
         
         WebDriver driver = new ChromeDriver();
         ArrayList<String> tournamentNames = new ArrayList<>();
-        tournamentNames.add("saltlakecity2023");
-        tournamentNames.add("richmond2023");
-        tournamentNames.add("philadelphia2023");
-        tournamentNames.add("scgrandslam2023");
-        tournamentNames.add("thepeopleschampionship");  
-        tournamentNames.add("heatwavevi");
-        tournamentNames.add("rivercup");
-        tournamentNames.add("ers23md");
-        tournamentNames.add("nashvillecup2023");
-        tournamentNames.add("etslondon2023");
-        tournamentNames.add("windy-city-classic-23");
-        tournamentNames.add("coupeestivale");
-        tournamentNames.add("long-island-classic-2023");
-        tournamentNames.add("sts23portlandopen");
-        tournamentNames.add("toulouse2023");
-        tournamentNames.add("ers23nova");
-        tournamentNames.add("sdgrandslam2023");
-        tournamentNames.add("queencityclassic2023");
-        tournamentNames.add("stockholm");
-        tournamentNames.add("atlslam23");
-        tournamentNames.add("etsprague2023");
-        tournamentNames.add("tograndslam2023");
+        // tournamentNames.add("saltlakecity2023");
+        // tournamentNames.add("richmond2023");
+        // tournamentNames.add("philadelphia2023");
+        // tournamentNames.add("scgrandslam2023");
+        // tournamentNames.add("thepeopleschampionship");  
+        // tournamentNames.add("heatwavevi");
+        // tournamentNames.add("rivercup");
+        // tournamentNames.add("ers23md");
+        // tournamentNames.add("nashvillecup2023");
+        // tournamentNames.add("etslondon2023");
+        // tournamentNames.add("windy-city-classic-23");
+        // tournamentNames.add("coupeestivale");
+        // tournamentNames.add("long-island-classic-2023");
+        // tournamentNames.add("sts23portlandopen");
+        // tournamentNames.add("toulouse2023");
+        // tournamentNames.add("ers23nova");
+        // tournamentNames.add("sdgrandslam2023");
+        // tournamentNames.add("queencityclassic2023");
+         tournamentNames.add("stockholm");
+        // tournamentNames.add("atlslam23");
+        // tournamentNames.add("etsprague2023");
+        // tournamentNames.add("tograndslam2023");
         ArrayList<TeamObject> teamObjects = new ArrayList<>();
         ArrayList<TeamResultObject> divisionTeamResults = new ArrayList<>();
         ArrayList<GameData> games = new ArrayList<>();
@@ -62,15 +62,15 @@ public class FwangoScraper {
             System.out.println("Currently working on: " + tournamentNames.get(i) + " (" + (i+1) + " out of " + tournamentNames.size() + ")");
             String tourneyName = tournamentNames.get(i);
             String url = "https://fwango.io/" + tourneyName;
-            driver.manage().window().setSize(new Dimension(1200, 1000)); // Set window size
+            driver.manage().window().setSize(new Dimension(1200, 1400)); // Set window size
             System.out.println("Working on home page");
             processHomePage(driver, url, tourneyName, teamObjects, tournamentObjects);
             System.out.println("Working on results page");
-            processResultsPage(driver, url, divisionTeamResults, tourneyName);
+           // processResultsPage(driver, url, divisionTeamResults, tourneyName);
             System.out.println("Working on pool play page");
-            processPoolPlay(driver, url, tourneyName, games);
+           // processPoolPlay(driver, url, tourneyName, games);
             System.out.println("Working on bracket play page");
-            processBracketPlay(driver, url, tourneyName, games, series);
+           // processBracketPlay(driver, url, tourneyName, games, series);
             long endTime = System.currentTimeMillis(); // Capture end time
             long elapsedTime = endTime - startTime; // Calculate elapsed time
             System.out.println(teamObjects.size() + " teams");
@@ -210,6 +210,19 @@ public class FwangoScraper {
         } catch (Exception e) {
             if(!quiet){e.printStackTrace();}
         } 
+    }
+    private static List<String> getTeamNames(WebDriver driver, List<String> teamNames, String lastTeamName, List<String> playerNames) {
+        List<WebElement> teamNameElements = driver.findElements(By.cssSelector("button.team-name-clickable"));
+        List<WebElement> playersElements = driver.findElements(By.className("players"));
+            
+        for (int i=0; i<teamNameElements.size() && i<playersElements.size(); i++) {
+            String teamName = teamNameElements.get(i).getText();
+            WebElement playerNameElement = playersElements.get(i).findElement(By.tagName("span"));
+            String names = playerNameElement.getText();
+            teamNames.add(teamName);
+            playerNames.add(names);
+        }
+        return teamNames;
     }
     public static void processResultsPage(WebDriver driver, String url, ArrayList<TeamResultObject> divisionTeamResults, String tournament){
         // Now go to results page
@@ -359,20 +372,6 @@ public class FwangoScraper {
             if(!quiet){e.printStackTrace();}
         } 
        
-    }
-    
-    private static List<String> getTeamNames(WebDriver driver, List<String> teamNames, String lastTeamName, List<String> playerNames) {
-        List<WebElement> teamNameElements = driver.findElements(By.cssSelector("button.team-name-clickable"));
-        List<WebElement> playersElements = driver.findElements(By.className("players"));
-            
-        for (int i=0; i<teamNameElements.size(); i++) {
-            String teamName = teamNameElements.get(i).getText();
-            WebElement playerNameElement = playersElements.get(i).findElement(By.tagName("span"));
-            String names = playerNameElement.getText();
-            teamNames.add(teamName);
-            playerNames.add(names);
-        }
-        return teamNames;
     }
     public static List<String> removeNonUniqueCombinations(List<String> playerNames, List<String> teamNames) {
         Set<String> uniqueCombinations = new HashSet<>();
