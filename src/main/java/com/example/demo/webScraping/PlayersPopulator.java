@@ -17,9 +17,9 @@ import com.google.gson.Gson;
 
 public class PlayersPopulator {
     public static void main(String[] args) {
-        String jdbcUrl = "exampleURL";
-        String username = "exampleUsername";
-        String password = "examplePass";
+        String jdbcUrl = System.getProperty("spring.datasource.url");
+        String username = System.getProperty("spring.datasource.username");
+        String password = System.getProperty("spring.datasource.password");
         long programStartTime = System.currentTimeMillis();
         try (Connection connection = DriverManager.getConnection(jdbcUrl, username, password)) {
            // populatePlayers(connection);
