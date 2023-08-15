@@ -17,9 +17,9 @@ import com.google.gson.Gson;
 
 public class PlayersPopulator {
     public static void main(String[] args) {
-        String jdbcUrl = "jdbc:postgresql://mahmud.db.elephantsql.com:5432/qwjqdpav";
-        String username = "qwjqdpav";
-        String password = "RUgzDe5vDvda80Y1hv2RUhU8XVo75M-D";
+        String jdbcUrl = System.getProperty("spring.datasource.url");
+        String username = System.getProperty("spring.datasource.username");
+        String password = System.getProperty("spring.datasource.password");
         long programStartTime = System.currentTimeMillis();
         try (Connection connection = DriverManager.getConnection(jdbcUrl, username, password)) {
            // populatePlayers(connection);
