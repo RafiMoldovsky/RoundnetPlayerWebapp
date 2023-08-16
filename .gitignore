@@ -2,3 +2,5 @@
 backend/src/main/resources/application.properties
 backend/src/main/resources/application.properties
 backend/myapp.log
+
+*.properties

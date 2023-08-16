@@ -6,6 +6,8 @@ build/
 !**/src/test/**/build/
 backend\src\main\resources\application.properties
 backend\myapp.log
+backend/src/main/resources/application.properties
+
 
 ### STS ###
 .apt_generated

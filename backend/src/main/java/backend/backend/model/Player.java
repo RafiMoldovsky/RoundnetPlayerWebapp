@@ -44,18 +44,18 @@ public class Player {
     @Override
     public String toString() {
         return "Player{" +
-                "player_name='" + player_name + '\'' +
-                ", greatest_point_diff_game_win='" + greatest_point_diff_game_win + '\'' +
-                ", greatest_point_diff_game_loss='" + greatest_point_diff_game_loss + '\'' +
-                ", past_tournaments='" + past_tournaments + '\'' +
-                ", longest_overtime_game='" + longest_overtime_game + '\'' +
+                "player_name='" + player_name + 
+                ", greatest_point_diff_game_win='" + greatest_point_diff_game_win + 
+                ", greatest_point_diff_game_loss='" + greatest_point_diff_game_loss + 
+                ", past_tournaments='" + past_tournaments +
+                ", longest_overtime_game='" + longest_overtime_game +
                 ", games_won=" + games_won +
                 ", games_lost=" + games_lost +
                 ", series_won=" + series_won +
                 ", series_lost=" + series_lost +
                 ", points_won=" + points_won +
                 ", points_lost=" + points_lost +
-                ", closest_series='" + closest_series + '\'' +
+                ", closest_series='" + closest_series  +
                 '}';
     }
 }
