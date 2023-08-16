@@ -21,7 +21,10 @@ export default function PlayersPage(){
       <div>Players</div>
       <input className="border border-black" placeholder="Enter Player's Name" value={searchInput} onChange={(e) => setSearchInput(e.target.value)}/>
       {searchedPlayers.map(player => 
-        <Link key={player.name} href={`/players/${player.name}`}>
+        <Link key={player.id} href={{
+          pathname: `/players/${player.name}`,
+          query: {playerData: JSON.stringify({name: player.name, id: player.id})}
+        }}>
           <div className="text-gray-700 hover:text-black">
             {player.name}
           </div>
