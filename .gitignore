@@ -4,3 +4,4 @@ backend/src/main/resources/application.properties
 backend/myapp.log
 
 *.properties
+WebScraper/src/main/resources/application.properties
