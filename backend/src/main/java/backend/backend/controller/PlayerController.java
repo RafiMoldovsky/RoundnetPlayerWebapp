@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import backend.backend.model.Player;
 import backend.backend.repositories.PlayerRepository;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api")
@@ -30,5 +31,9 @@ public class PlayerController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+    @GetMapping("/allplayers")
+    public ResponseEntity<List<String>> getAllPlayerNames() {
+        return ResponseEntity.ok(playerRepository.getAllPlayerNames());
     }
 }
