@@ -7,9 +7,9 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 
 @SpringBootApplication
-@ComponentScan(basePackages = "backend.backend")
-@EnableJpaRepositories(basePackages = "backend.backend")
-@EntityScan(basePackages = "backend.backend") 
+@ComponentScan(basePackages = "backend.backend") 
+@EnableJpaRepositories(basePackages = "backend.backend.repositories")
+@EntityScan(basePackages = "backend.backend.model")
 public class BackendApplication {
 
 	public static void main(String[] args) {
