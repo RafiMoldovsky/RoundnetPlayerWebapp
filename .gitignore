@@ -6,9 +6,11 @@ teamObjects.csv
 tournaments.csv
 .gradle
 .DS_store
+build/
 src\main\resources\application.properties
 !gradle/wrapper/gradle-wrapper.jar
-
+!**/src/main/**/build/
+!**/src/test/**/build/
 
 backend/src/main/resources/application.properties
 backend/src/main/resources/application.properties
