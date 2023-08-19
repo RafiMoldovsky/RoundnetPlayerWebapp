@@ -1,0 +1,9 @@
+FROM openjdk:11-jdk-alpine
+
+WORKDIR /backend
+
+COPY . .
+
+RUN gradle build
+
+CMD java -jar build/libs/my-app.jar
