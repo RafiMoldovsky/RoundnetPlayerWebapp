@@ -1,5 +1,7 @@
 FROM openjdk:11
 
-COPY build/libs/my-app.jar /app.jar
+WORKDIR /app
 
-ENTRYPOINT ["java", "-jar", "/app.jar"]
+COPY build/libs/my-app.jar .
+
+ENTRYPOINT ["java", "-jar", "my-app.jar"]
