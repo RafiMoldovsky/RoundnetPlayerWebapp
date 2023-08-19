@@ -1,9 +1,5 @@
-FROM openjdk:11-jdk-alpine
+FROM openjdk:11
 
-WORKDIR /backend
+COPY build/libs/my-app.jar /app.jar
 
-COPY . .
-
-RUN gradle build
-
-CMD java -jar build/libs/my-app.jar
+ENTRYPOINT ["java", "-jar", "/app.jar"]
