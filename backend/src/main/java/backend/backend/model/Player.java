@@ -36,6 +36,8 @@ public class Player {
     @Column(columnDefinition = "jsonb")
     private String closest_series;
 
+    private Integer points;
+
     // Constructors, getters, setters, and other methods
 
     // Getters and setters...
