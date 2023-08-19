@@ -5,6 +5,7 @@ divisionTeamResults.csv
 teamObjects.csv
 tournaments.csv
 .gradle
+.DS_store
 build/
 src\main\resources\application.properties
 !gradle/wrapper/gradle-wrapper.jar
