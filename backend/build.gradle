@@ -36,7 +36,7 @@ tasks.named('test') {
 }
 
 bootJar {
-    mainClass = 'backend.backend'
+    mainClass = 'backend.backend.BackendApplication'
 }
 
 docker {
