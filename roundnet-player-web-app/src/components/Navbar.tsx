@@ -8,9 +8,9 @@ export default function Navbar() {
           Home
         </button>
       </Link>
-      <Link href={"/tournaments"}>
+      <Link href={"/connections"}>
         <button>
-          Tournaments
+          Connections
         </button>
       </Link>
       <Link href={"/players"}>
