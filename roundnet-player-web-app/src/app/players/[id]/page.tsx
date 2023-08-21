@@ -8,9 +8,8 @@ interface pageProps{
 
 export default function PlayerPage({params}: pageProps){
   const player = players.get(params.id);
-  console.log(isAPlayer(player));
   if(!isAPlayer(player)) {
-    return null;
+    return <div>PLAYER NOT FOUND!</div>;
   }
   return (
     <div>{player.id} {player.name}</div>
