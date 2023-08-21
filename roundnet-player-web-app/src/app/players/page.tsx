@@ -9,10 +9,9 @@ export default function PlayersPage(){
 
   //Making an array of the players that should show up on this search
   const searchedPlayers: playerInterface[] = [];
-
-  for (var i in players) {
-    if(players[i].name.toLowerCase().includes(searchInput.toLowerCase())){
-      searchedPlayers.push(players[i]);
+  for (let p of players.values()) {
+    if(p.name.toLowerCase().includes(searchInput.toLowerCase())){
+      searchedPlayers.push(p);
     }
   }
   
@@ -21,10 +20,7 @@ export default function PlayersPage(){
       <div>Players</div>
       <input className="border border-black" placeholder="Enter Player's Name" value={searchInput} onChange={(e) => setSearchInput(e.target.value)}/>
       {searchedPlayers.map(player => 
-        <Link key={player.id} href={{
-          pathname: `/players/${player.name}`,
-          query: {playerData: JSON.stringify({name: player.name, id: player.id})}
-        }}>
+        <Link key={player.id} href={`/players/${player.id}`}>
           <div className="text-gray-700 hover:text-black">
             {player.name}
           </div>
