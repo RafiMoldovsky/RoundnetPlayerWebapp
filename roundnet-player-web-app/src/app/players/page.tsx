@@ -10,7 +10,7 @@ export default function PlayersPage(){
   //Making an array of the players that should show up on this search
   const searchedPlayers: playerInterface[] = [];
   for (let p of players.values()) {
-    if(p.name.toLowerCase().includes(searchInput.toLowerCase())){
+    if(p.player_name.toLowerCase().includes(searchInput.toLowerCase())){
       searchedPlayers.push(p);
     }
   }
@@ -22,7 +22,7 @@ export default function PlayersPage(){
       {searchedPlayers.map(player => 
         <Link key={player.id} href={`/players/${player.id}`}>
           <div className="text-gray-700 hover:text-black">
-            {player.name}
+            {player.player_name}
           </div>
         </Link>
       )}

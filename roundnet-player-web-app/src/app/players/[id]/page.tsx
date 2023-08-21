@@ -12,6 +12,8 @@ export default function PlayerPage({params}: pageProps){
     return <div>PLAYER NOT FOUND!</div>;
   }
   return (
-    <div>{player.id} {player.name}</div>
+    <>
+      <div>{player.player_name}</div>
+    </>
   )
 }
