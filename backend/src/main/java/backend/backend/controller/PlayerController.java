@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,6 +13,7 @@ import backend.backend.model.Player;
 import backend.backend.repositories.PlayerRepository;
 import java.util.List;
 
+@CrossOrigin(origins = {"http://localhost:3000", "https://roundnetplayer.vercel.app/"})
 @RestController
 @RequestMapping("/api")
 public class PlayerController {
